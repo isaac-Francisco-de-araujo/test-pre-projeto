@@ -1,0 +1,89 @@
+CREATE TABLE clientes (
+    id_cliente INTEGER PRIMARY KEY AUTOINCREMENT,
+    nome TEXT NOT NULL,
+    email TEXT UNIQUE NOT NULL,
+    telefone TEXT,
+    senha TEXT NOT NULL,
+    data_nascimento DATE,
+    data_cadastro DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE categorias (
+    id_categoria INTEGER PRIMARY KEY AUTOINCREMENT,
+    nome TEXT NOT NULL,
+    descricao TEXT
+);
+
+CREATE TABLE fornecedores (
+    id_fornecedor INTEGER PRIMARY KEY AUTOINCREMENT,
+    nome_empresa TEXT NOT NULL,
+    cnpj TEXT,
+    telefone TEXT,
+    email TEXT
+);
+
+CREATE TABLE produtos (
+    id_produto INTEGER PRIMARY KEY AUTOINCREMENT,
+    nome TEXT NOT NULL,
+    descricao TEXT,
+    id_categoria INTEGER,
+    id_fornecedor INTEGER,
+    preco REAL NOT NULL,
+    custo REAL,
+    ativo INTEGER DEFAULT 1,
+
+    FOREIGN KEY (id_categoria) REFERENCES categorias(id_categoria),
+    FOREIGN KEY (id_fornecedor) REFERENCES fornecedores(id_fornecedor)
+);
+
+CREATE TABLE estoque (
+    id_estoque INTEGER PRIMARY KEY AUTOINCREMENT,
+    id_produto INTEGER,
+    tamanho TEXT,
+    cor TEXT,
+    quantidade INTEGER DEFAULT 0,
+
+    FOREIGN KEY (id_produto) REFERENCES produtos(id_produto)
+);
+
+CREATE TABLE pedidos (
+    id_pedido INTEGER PRIMARY KEY AUTOINCREMENT,
+    id_cliente INTEGER,
+    data_pedido DATETIME DEFAULT CURRENT_TIMESTAMP,
+    status TEXT,
+    valor_total REAL,
+
+    FOREIGN KEY (id_cliente) REFERENCES clientes(id_cliente)
+);
+
+CREATE TABLE itens_pedido (
+    id_item INTEGER PRIMARY KEY AUTOINCREMENT,
+    id_pedido INTEGER,
+    id_produto INTEGER,
+    tamanho TEXT,
+    cor TEXT,
+    quantidade INTEGER,
+    preco_unitario REAL,
+
+    FOREIGN KEY (id_pedido) REFERENCES pedidos(id_pedido),
+    FOREIGN KEY (id_produto) REFERENCES produtos(id_produto)
+);
+
+CREATE TABLE pagamentos (
+    id_pagamento INTEGER PRIMARY KEY AUTOINCREMENT,
+    id_pedido INTEGER,
+    metodo_pagamento TEXT,
+    status TEXT,
+    valor REAL,
+    data_pagamento DATETIME,
+
+    FOREIGN KEY (id_pedido) REFERENCES pedidos(id_pedido)
+);
+
+CREATE TABLE usuarios_admin (
+    id_usuario INTEGER PRIMARY KEY AUTOINCREMENT,
+    nome TEXT,
+    email TEXT UNIQUE,
+    senha TEXT,
+    nivel_acesso TEXT
+);
