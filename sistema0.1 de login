@@ -1,0 +1,62 @@
+const express = require("express")
+const bcrypt = require("bcrypt")
+const jwt = require("jsonwebtoken")
+const path = require("path")
+
+const app = express()
+app.use(express.json())
+app.use(express.static(path.join(__dirname, "..", "front")))
+app.use(express.json())
+app.use(express.urlencoded({ extended: true }))
+// Simulando banco de dados (array)
+const users = []
+
+//  REGISTRAR
+app.post("/register", async (req, res) => {
+  const { username, email, password } = req.body
+
+  // Verifica se já existe
+  const userExists = users.find(user => user.email === email)
+  if (userExists) {
+    return res.status(400).json({ message: "Usuário já existe" })
+  }
+
+  // Criptografa senha
+  const hashedPassword = await bcrypt.hash(password, 10)
+
+  // Salva usuário
+  users.push({
+    username,
+    email,
+    password: hashedPassword
+  })
+
+  res.json({ message: "Usuário criado com sucesso" })
+})
+
+
+//  LOGIN
+app.post("/login", async (req, res) => {
+  const { email, password } = req.body
+
+  const user = users.find(user => user.email === email)
+  if (!user) {
+    return res.status(400).json({ message: "Usuário não encontrado" })
+  }
+
+  const validPassword = await bcrypt.compare(password, user.password)
+  if (!validPassword) {
+    return res.status(400).json({ message: "Senha incorreta" })
+  }
+
+  // Criar token
+  const token = jwt.sign({ email: user.email }, "segredo", {
+    expiresIn: "1h"
+  })
+
+  res.json({ message: "Login realizado", token })
+})
+
+app.listen(3000, () => {
+  console.log("Servidor rodando na porta 3000")
+})
